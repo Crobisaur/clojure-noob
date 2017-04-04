@@ -92,4 +92,69 @@
 ; (cons 0 '(2 4 6)) => (0 2 4 6)
 
 
+;moving on to collections
+;(map identity {:sunlight-reaction "Glitter!"})
 
+;major differences between into and conj is that conj passes
+;the second argument as a non-collection value whereas the
+;second argument of an into must be a collection
+
+;a good way to show how similar they are is to use into to
+;define conj
+
+(defn my-conj
+  [target & additions]
+  (into target additions))
+
+;onto functions
+; apply and partial
+;apply simply applies the given function onto the following structure
+;or function
+;ex: (apply max [0 1 2]))
+
+;using apply, we can now define into in terms of conj
+(defn my-into
+  [target additions]
+  (apply conj target additions))
+
+;partial will take a funciton and any number of arguments
+;and returns a new function
+
+(def add10 (partial + 10))
+
+(def add-missing-elements
+  (partial conj ["water" "earth" "air"]))
+
+;likewise let's define our own partial
+(defn my-partial
+  [partialized-fn & args]
+  (fn [& more-args]
+    (apply partialized-fn (into args more-args))))
+
+;and our own defined my-partial function
+(def add20 (my-partial + 20))
+
+;this weirdness is useful in cases where you are often repeating
+; the same combination of function and arguments in many different
+;contexts. For example:
+
+(defn lousy-logger
+  [log-level message]
+  (condp = log-level
+    :warn (clojure.string/lower-case message)
+    :emergency (clojure.string/upper-case message)))
+
+(def warn (partial lousy-logger :warn))
+
+;complement is the mathematical term for "the negation of/...
+;other than/opposite" this example will find all the humans
+;in our database created above
+
+(defn identify-humans
+  [social-security-numbers]
+  (filter #(not (vampire? %))
+          (map vampire-related-details social-security-numbers)))
+
+(def not-vampire? (complement vampire?))
+(defn identify-humans
+  [social-security-numbers])
