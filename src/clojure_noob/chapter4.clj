@@ -157,4 +157,54 @@
 
 (def not-vampire? (complement vampire?))
 (defn identify-humans
-  [social-security-numbers])
+  [social-security-numbers]
+  (filter not-vampire?
+          (map vampire-related-details social-security-numbers)))
+
+;and keeping with tradition, here's how we might implement complement
+(defn my-complement
+  [fun]
+  (fn [& args]
+    (not (apply fun args))))
+
+(def my-pos? (my-complement neg?))
+
+
+;now some fun with .csv files
+(def filename "resources/suspects.csv")
+(def vamp-keys [:name :glitter-index])
+
+(defn str->int
+  [str]
+  (Integer. str))
+
+(def conversions {:name identity
+                  :glitter-index str->int})
+
+(defn convert
+  [vamp-key value]
+  ((get conversions vamp-key) value))
+
+(defn parse
+  "Convert a CSV into rows of columns"
+  [string]
+  (map #(clojure.string/split % #",")
+       (clojure.string/split string #"\n")))
+
+(defn mapify
+  "Return a seq of maps like {:name\"Edawrd Cullen :glitter-index 10}"
+  [rows]
+  (map (fn [unmapped-row]
+         (reduce (fn [row-map [vamp-key value]]
+                   (assoc row-map vamp-key (convert vamp-key value)))
+                 {}
+                 (map vector vamp-keys unmapped-row)))
+       rows))
+
+;and now we create a filter function
+(defn glitter-filter
+  [minimum-glitter records]
+  (filter #(>= (:glitter-index %) minimum-glitter) records))
+
+;test this filter function by running:
+;(glitter-filter 3 (mapify (parse (slurp filename))))
