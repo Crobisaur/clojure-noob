@@ -91,3 +91,27 @@
 ;which, you guessed it, returns an immutable string.
 
 ;as an aside, there is a strong similarity
+
+;learning about partial, comp and memoize
+;comp let's you compose a new function from a set of other
+;functions, for example
+;((comp inc *) 2 3)
+; => 7
+;would return 7 as the numbers two and three would be multiplied
+;together and the result is incremented by one.  Note that *
+;may take any number of arguments while inc will only take one
+;Comp may also be used in a multitude of ways, this example shows
+;how it may be used to retrieve character stats from an RPG.
+
+(def character
+  {:name "Smooches McCutes"
+   :attributes {:intelligence 10
+                :strength 4
+                :dexterity 5}})
+(def c-int (comp :intelligence :attributes))
+(def c-str (comp :strength :attributes))
+(def c-dex (comp :dexterity :attributes))
+
+;calling any of the c-* functions will return a character's
+;corresponding attributes
+
