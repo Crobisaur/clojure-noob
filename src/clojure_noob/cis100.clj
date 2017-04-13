@@ -17,13 +17,14 @@
 
 ;define the initial condition for registers in any process block
 ;TODO; Add a :cycle key to record how many operations have occured
-(def registers {:acc    0
-                :bak    0
-                :top    0
-                :btm    0
-                :lft    0
-                :rgt    0
-                :cyc    0})
+(def registers {:ACC 0
+                :BAK 0
+                :TOP nil
+                :BTM nil
+                :LFT nil
+                :RGT nil
+                :NIL 0
+                :CYC 0})
 
 ;check if value is within limits of machine
 (defn check-value [value]
@@ -39,16 +40,16 @@
 (defn NOP
   "Performs a no operation.  Does nothing, costs 1 cycle"
   [registers]
-  (update-in registers [:cyc] inc))
+  (update-in registers [:CYC] inc))
 
 (defn SWP
   "Takes in all registers and swaps the values stored in
    the accumulator and save registers, it is not permitted
-   to update :bak directly"
+   to update :BAK directly"
   [registers]
-  (assoc registers :acc (registers :bak)
-                   :bak (registers :acc)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :ACC (registers :BAK)
+                   :BAK (registers :ACC)
+                   :CYC (+ (registers :CYC) 1)))
 ;(clojure.set/rename-keys registers
 ;(update-in registers [:sav :acc] (select-keys registers [:acc :sav]))
 
@@ -56,32 +57,32 @@
   "Copies accumulator value into backup register, writing
    directly to backup register is not allowed"
   [registers]
-  (assoc registers :bak (registers :acc)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :BAK (registers :ACC)
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn ADD
   "Takes in any integer and adds it to the accumulator
-  register :acc"
+  register :ACC"
   [value registers]
   (update-acc [(check-value
                  (+ (check-value value)
-                    (registers :acc)))]
+                    (registers :ACC)))]
               registers))
 
 (defn SUB
   "Takes in any integer and subtracts it from the
-  accumulator register :acc"
+  accumulator register :ACC"
   [value registers]
   (update-acc [(check-value
                  (- (check-value value)
-                    (registers :acc)))]
+                    (registers :ACC)))]
                registers))
 
 (defn NEG
   "Negates the value in the accumulator (ACC * -1)"
   [registers]
-  (assoc registers :acc (- (registers :acc))
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :ACC (- (registers :ACC))
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn get-registers
   "Returns the correspoding register (key) values."
@@ -91,47 +92,47 @@
 (defn update-acc-DEP
   "DEPRECATED METHOD"
   [new-val registers]
-  (update-in registers [:acc] new-val))
+  (update-in registers [:ACC] new-val))
 
 (defn update-acc
   "Takes in a single element vector and a map of registers
    associates the new-val to :acc and returns a new map of
    updated registers"
   [new-val registers]
-  (assoc registers :acc (first new-val)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :ACC (first new-val)
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn update-top
   "Takes in a single element vector and a map of registers
-   associates the new-val to :top and returns a new map of
+   associates the new-val to :TOP and returns a new map of
    updated registers"
   [new-val registers]
-  (assoc registers :top (first new-val)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :TOP (first new-val)
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn update-bottom
   "Takes in a single element vector and a map of registers
-   associates the new-val to :bottom and returns a new map of
+   associates the new-val to :BTM and returns a new map of
    updated registers"
   [new-val registers]
-  (assoc registers :btm (first new-val)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :BTM (first new-val)
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn update-left
   "Takes in a single element vector and a map of registers
-   associates the new-val to :left and returns a new map of
+   associates the new-val to :LFT and returns a new map of
    updated registers"
   [new-val registers]
-  (assoc registers :lft (first new-val)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :LFT (first new-val)
+                   :CYC (+ (registers :CYC) 1)))
 
 (defn update-right
   "Takes in a single element vector and a map of registers
-   associates the new-val to :right and returns a new map of
+   associates the new-val to :RGT and returns a new map of
    updated registers"
   [new-val registers]
-  (assoc registers :rgt (first new-val)
-                   :cyc (+ (registers :cyc) 1)))
+  (assoc registers :RGT (first new-val)
+                   :CYC (+ (registers :CYC) 1)))
 
 
 
