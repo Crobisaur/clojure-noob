@@ -115,3 +115,13 @@
 ;calling any of the c-* functions will return a character's
 ;corresponding attributes
 
+(defn spell-slots
+  [char]
+  (int (inc (/ (c-int char) 2))))
+;now an implementation of spell-slots using comp
+(def spell-slots-comp (comp int inc #(/ % 2) c-int))
+
+(defn two-comp
+  [f g]
+  (fn [& args]
+    (f (apply g args))))
