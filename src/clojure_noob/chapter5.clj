@@ -125,3 +125,20 @@
   [f g]
   (fn [& args]
     (f (apply g args))))
+
+;memoization let's you exploit referential transparency by
+;storing arguments passed to a function as the result of that
+;function for example (+ 2 5) can be stored as 7
+
+(defn sleepy-identity
+  "Returns the given value after 1 second"
+  [x]
+  (Thread/sleep 1000)
+  x)
+
+;now if we memoize our call, every subsequent call returns immediately:
+(def memo-sleepy-identity (memoize sleepy-identity))
+
+;implementing this can be useful for functions that are computationally
+;intensive or functions that make network requests.
+
