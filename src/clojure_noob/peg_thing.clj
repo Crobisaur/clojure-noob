@@ -2,7 +2,7 @@
   (require [clojure.set :as set])
   (:gen-class))
 
-(declare successful-move prompt-move game-over query-rows)
+(declare successful-move prompt-move game-over prompt-rows)
 
 ;create a lazy sequence of triangular numbers which is a
 ;series summing the natural numbers ex: 1, 3 (1+2), 6 (1+2+3),...
@@ -294,8 +294,123 @@
 ;finally, print-board (below) iterates over each row number with doseq
 ;printing the string representation of that row.
 
-(defn print-baord
+(defn print-board
   [board]
   (doseq [row-num (range 1 (inc (:rows board)))]
     (println (render-row board row-num))))
 
+;;;;
+;Player Interaction
+;;;;
+
+(defn letter->pos
+  "Converts a letter string to the corresponding position number"
+  [letter]
+  (inc (- (int (first letter)) alpha-start)))
+
+(defn get-input
+  "Waits for user to enter text and hit enter, then cleans the input"
+  ([] (get-input nil))
+  ([default]
+    (let [input (clojure.string/trim (read-line))]
+      (if (empty? input)
+        default
+        (clojure.string/lower-case input)))))
+
+;The get-input functon is a helper function which allows you to read
+;and clean a player's input.  This also allows for you to use a default
+;input to enter when the user doesn't input anything.
+
+(defn characters-as-strings
+  "Given a string, retrun a collection consisting of each individual
+  character"
+  [string]
+  (re-seq #"[a-zA-Z]" string))
+
+;this helper function is used by prompt-move to take in strings and
+;return a collection of letters with all non alphabetic input discarded
+
+(defn prompt-move
+  "Reads the player's input and acts on it"
+  [board]
+  (println "\nHere's your board:")
+  (print-board board)
+  (println "Move from where to where? Enter two letters:")
+  (let [input (map letter->pos (characters-as-strings (get-input)))]
+    (if-let [new-board (make-move board (first input) (second input))]
+      (successful-move new-board)
+      (do
+        (println "\n!!! That was an invalid move :(\n")
+        (prompt-move board)))))
+
+(defn successful-move
+  "Checks to see if any valid moves can be made and if not, game over"
+  [board]
+  (if (can-move? board)
+    (prompt-move board)
+    (game-over board)))
+
+;the make-move in the if-let will attempt to make a move and will return
+;nil if the player made an invalid move.  The board is then passed to
+;one of two functions to inform the player if they either made a mistake
+;or prompt for their next move and pass current or updated board
+;respectively.
+
+;if-let sounds a lot like a try catch in C# based on this example
+
+(defn user-entered-invalid-move
+  "DEPRECATED: Handles the next step after a user has entered an invalid move"
+  [board]
+  (println "\n!!! That was an invaid move :(\n")
+  (prompt-move board))
+
+;however if a valid move is given the board is passed back into
+;prompt-move if there are still moves to be played otherwise, game over
+
+(defn user-entered-valid-move
+  "DEPRECATED: Handles the next step after a user has entered a vaid move"
+  [board]
+  (if (can-move? board)
+    (prompt-move board)
+    (game-over board)))
+
+;In the board creation functions above, recursion was uses to build up a
+;value using imutable data structures.  The same is happening here, only
+;it involves two mutually recursive functions and some user input.
+
+(defn game-over
+  "Announce the game is over and prompt to play again"
+  [board]
+  (let [remaining-pegs (count (filter :pegged (vals board)))]
+    (println "Game Over!  You had" remaining-pegs "pegs left:")
+    (print-board board)
+    (println "Play again? y/n [y]")
+    (let [input (get-input "y")]
+      (if (= "y" input)
+        (prompt-rows)
+        (do
+          (println "Bye!")
+          (System/exit 0))))))
+
+;The game informs the player how they did, prints the final board and
+;prompts them to play again.  If yes, these last two functions are
+;called which are used to start a new game.
+
+(defn prompt-empty-peg
+  [board]
+  (println "Here's your board:")
+  (print-board board)
+  (println "Remove which peg? [e]")
+  (prompt-move (remove-peg board (letter->pos (get-input "e")))))
+
+(defn prompt-rows
+  []
+  (println "How many rows? [5]")
+  (let [rows (Integer. (get-input 5))
+        board (new-board rows)]
+    (prompt-empty-peg board)))
+
+(defn -main
+  [& args]
+  (println "Get ready to play peg thing!")
+  (prompt-rows))
