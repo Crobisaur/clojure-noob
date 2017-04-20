@@ -1,4 +1,6 @@
 (ns clojure-noob.cis100)
+
+(declare update-acc)
 ;clojure adaptation of the TIS-100 Tesselated Intelligence System
 ;this was created in an attempt to better understand clojure,
 ;functional programming, and some assembly language practices.
@@ -15,6 +17,21 @@
                     :left
                     :right])
 
+(def field-size
+  "Define the size of the field for the game, default is 3x4"
+  [3 4])
+;define the size of the field for the game.  Keep fixed for now.
+
+(defn rect
+  "Returns a list of numbers for each position in the field"
+  )
+
+(defn max-block
+  "Determines the maximum block position based on given rows & cols"
+  [field-size]
+  (reduce * field-size))
+
+
 ;define the initial condition for registers in any process block
 ;TODO; Add a :cycle key to record how many operations have occured
 (def registers {:ACC 0
@@ -26,8 +43,22 @@
                 :NIL 0
                 :CYC 0})
 
+
+
+
+;specify how many compute nodes are on the field, assume 4wx3h
+(defn new-field
+  "Creates a new field of compute nodes containing their own set
+  of registers."
+  [rows cols]
+  ())
+
+
+
 ;check if value is within limits of machine
-(defn check-value [value]
+(defn check-value
+  "Check if integer value is within limits of machine +- 999"
+  [value]
   (if (> value (:upper limits))
     (:upper limits)
     (if (< value (:lower limits))

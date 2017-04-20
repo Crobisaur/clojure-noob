@@ -16,7 +16,8 @@
   (map #(clojure.string/split % #" ")
        (clojure.string/split string #"\n")))
 ;TODO: implement a way to parse out MOV x, y instructions
-
+;no need to look for the comma as MOV only moves whatever is in
+;ACC to the specified port
 
 (defn lexify
   "Lexer to construct the functions based on instructions
